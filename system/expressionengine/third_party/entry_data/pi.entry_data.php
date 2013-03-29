@@ -31,12 +31,27 @@ class Entry_Data {
 	private $url_title;
 	private $field_name;
 	private $field_id;
+	private $where_channel_id="";
 	
 	public $return_data;
 
 	// Constructor
 	function entry_data() {
 		$this->EE =& get_instance();
+		$channel = $this->EE->TMPL->fetch_param('channel');
+		if(!empty($channel)) :
+			$this->results = $this->EE->db->query('SELECT channel_id FROM '.$this->EE->db->dbprefix('channels').' WHERE channel_name = "'.$channel.'" LIMIT 1');
+	
+			if($this->results->num_rows() == 0) :
+				if($this->errors == 'false') :
+					$this->return_data = '';
+				else :
+					$this->return_data = 'No matching channel found';
+				endif;
+			else :
+				$this->where_channel_id = " AND channel_id = ".$this->results->row('channel_id')." ";
+			endif;
+		endif;
 	}
 	
 	/**
@@ -67,7 +82,7 @@ class Entry_Data {
 		endif;
 		
 		if(!empty($this->url_title)) :
-			$this->results = $this->EE->db->query('SELECT title FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'" LIMIT 1');
+			$this->results = $this->EE->db->query('SELECT title FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'"'.$this->where_channel_id.' LIMIT 1');
 	
 			if($this->results->num_rows() == 0) :
 				if($this->errors == 'false') :
@@ -111,7 +126,7 @@ class Entry_Data {
 		endif;
 		
 		if(!empty($this->title)) :
-			$this->results = $this->EE->db->query('SELECT url_title FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'" LIMIT 1');
+			$this->results = $this->EE->db->query('SELECT url_title FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'"'.$this->where_channel_id.' LIMIT 1');
 	
 			if($this->results->num_rows() == 0) :
 				if($this->errors == 'false') :
@@ -141,7 +156,7 @@ class Entry_Data {
 		$this->errors = $this->EE->TMPL->fetch_param('errors');
 		
 		if(!empty($this->url_title)) :
-			$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'" LIMIT 1');
+			$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'"'.$this->where_channel_id.' LIMIT 1');
 	
 			if($this->results->num_rows() == 0) :
 				if($this->errors == 'false') :
@@ -155,7 +170,7 @@ class Entry_Data {
 		endif;
 		
 		if(!empty($this->title)) :
-			$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'" LIMIT 1');
+			$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'"'.$this->where_channel_id.' LIMIT 1');
 	
 			if($this->results->num_rows() == 0) :
 				if($this->errors == 'false') :
@@ -210,8 +225,8 @@ class Entry_Data {
 						
 		if(empty($this->entry_id)) :	
 			if(!empty($this->url_title)) :
-				$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'" LIMIT 1');
-		
+				$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE url_title = "'.$this->url_title.'"'.$this->where_channel_id.' LIMIT 1');
+
 				if($this->results->num_rows() == 0) :
 					if($this->errors == 'false') :
 						$this->return_data = '';
@@ -222,7 +237,7 @@ class Entry_Data {
 					$this->entry_id = $this->results->row('entry_id');
 				endif;		
 			elseif(!empty($this->title)) :
-				$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'" LIMIT 1');
+				$this->results = $this->EE->db->query('SELECT entry_id FROM '.$this->EE->db->dbprefix('channel_titles').' WHERE title = "'.$this->title.'"'.$this->where_channel_id.' LIMIT 1');
 		
 				if($this->results->num_rows() == 0) :
 					if($this->errors == 'false') :
@@ -258,17 +273,17 @@ class Entry_Data {
 		?>
 		{exp:entry_data:title entry_id="1"}
 		
-		{exp:entry_data:title url_title="about-us"}
+		{exp:entry_data:title url_title="about-us" channel="pages"}
 		
 		{exp:entry_data:url_title entry_id="{entry_id}"}
 		
-		{exp:entry_data:url_title title="About Us"}
+		{exp:entry_data:url_title title="About Us" channel="pages"}
 		
-		{exp:entry_data:entry_id url_title="about-us"}
+		{exp:entry_data:entry_id url_title="about-us" channel="pages"}
 		
-		{exp:entry_data:entry_id title="About Us"}
+		{exp:entry_data:entry_id title="About Us" channel="pages"}
 		
-		{exp:entry_data:custom_field url_title="about-us" field_name="about-us-summary"}
+		{exp:entry_data:custom_field url_title="about-us" field_name="about-us-summary" channel="pages"}
 		
 		<?php
 		$buffer = ob_get_contents();
